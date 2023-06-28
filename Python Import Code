@@ -1,0 +1,46 @@
+
+					from flask import Flask, request
+import requests
+
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.get_json()
+    print('Received alert:', data)
+
+    # Extract information from the alert
+    # This depends on how you've set up your alerts in TradingView
+    symbol = data['symbol']
+    action = data['action']  # 'buy' or 'sell'
+
+    # Send order to OANDA
+    send_order_to_oanda(symbol, action)
+
+    return '', 200
+
+def send_order_to_oanda(symbol, action):
+    # This function should use OANDA's API to send an order
+    # You'll need to fill in your account ID and API key
+    account_id = 'your-account-id'
+    api_key = 'your-api-key'
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}',
+    }
+
+    data = {
+        'order': {
+            'instrument': symbol,
+            'units': 100 if action == 'buy' else -100,
+            'type': 'MARKET',
+        }
+    }
+
+    response = requests.post(f'https://api-fxtrade.oanda.com/v3/accounts/{account_id}/orders', headers=headers, json=data)
+    print('OANDA response:', response.json())
+
+if __name__ == '__main__':
+    app.run(port=5000)
+				
